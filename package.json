@@ -1,0 +1,22 @@
+{
+  "name": "web-studio",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Сайт-портфолио: Vue 3 + Vite, статика через vite-ssg",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite-ssg build",
+    "build:spa": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "vue": "^3.5.42"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.9",
+    "vite": "^8.3.0",
+    "vite-ssg": "^28.3.0"
+  }
+}

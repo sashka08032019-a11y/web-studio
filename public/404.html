@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>404 — Страница не найдена</title>
+    <meta name="theme-color" content="#14161a" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&family=IBM+Plex+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #14161a;
+        --text: #ece8df;
+        --text-muted: #a3a099;
+        --accent: #c6a15b;
+        --accent-strong: #d9b877;
+        --line-strong: rgba(255, 255, 255, 0.16);
+        --ease: cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "IBM Plex Sans", sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      .not-found {
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 48px 32px;
+        text-align: center;
+      }
+      .not-found__canvas {
+        display: block;
+        max-width: 100%;
+        cursor: default;
+      }
+      .not-found__sub {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        max-width: 42ch;
+        margin-top: 12px;
+      }
+      .not-found__actions {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 24px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 28px;
+        font-size: 0.9rem;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        transition:
+          background 0.25s var(--ease),
+          border-color 0.25s var(--ease),
+          color 0.25s var(--ease);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #181a1e;
+      }
+      .btn-primary:hover {
+        background: var(--accent-strong);
+      }
+      .btn-outline {
+        border-color: var(--line-strong);
+      }
+      .btn-outline:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      noscript h1 {
+        font-family: "Fraunces", serif;
+        font-weight: 900;
+        font-size: clamp(6rem, 24vw, 16rem);
+        line-height: 1;
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="not-found">
+      <canvas id="fuzzy-canvas" class="not-found__canvas" role="img" aria-label="404"></canvas>
+      <noscript>
+        <h1>404</h1>
+      </noscript>
+      <p class="not-found__sub">Такой страницы нет — возможно, её не существовало, или ссылка устарела.</p>
+      <div class="not-found__actions">
+        <a class="btn btn-primary" href="/">На главную</a>
+        <a class="btn btn-outline" href="/#contact">Обсудить проект</a>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var canvas = document.getElementById('fuzzy-canvas');
+        var ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // Порт FuzzyText из React Bits (reactbits.dev/text-animations/fuzzy-text) на vanilla JS
+        var config = {
+          text: '404',
+          fontWeight: 900,
+          fontSizeCss: 'clamp(7rem, 26vw, 17rem)',
+          fontFamily: '"Fraunces", Georgia, serif',
+          color: '#c6a15b',
+          baseIntensity: 0.18,
+          hoverIntensity: 0.5,
+          fuzzRange: 30,
+          fps: 60,
+          transitionMs: 150
+        };
+
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var cancelled = false;
+        var rafId = null;
+
+        var numericFontSize = function () {
+          var temp = document.createElement('span');
+          temp.style.position = 'absolute';
+          temp.style.visibility = 'hidden';
+          temp.style.fontSize = config.fontSizeCss;
+          document.body.appendChild(temp);
+          var size = parseFloat(window.getComputedStyle(temp).fontSize) || 160;
+          document.body.removeChild(temp);
+          return size;
+        };
+
+        var init = function () {
+          // Ждём шрифт, иначе canvas отрисует текст системным
+          var whenReady = document.fonts && document.fonts.load
+            ? document.fonts
+                .load(config.fontWeight + ' 16px ' + config.fontFamily, config.text)
+                .catch(function () {})
+                .then(function () {
+                  return document.fonts.ready;
+                })
+                .catch(function () {})
+            : Promise.resolve();
+
+          whenReady.then(function () {
+            if (cancelled) return;
+
+            var numericSize = numericFontSize();
+            var font = config.fontWeight + ' ' + numericSize + 'px ' + config.fontFamily;
+
+            // Оффскрин-канвас с текстом, обрезанным по фактическим границам глифов
+            var offscreen = document.createElement('canvas');
+            var offCtx = offscreen.getContext('2d');
+            offCtx.font = font;
+            offCtx.textBaseline = 'alphabetic';
+
+            var metrics = offCtx.measureText(config.text);
+            var actualLeft = metrics.actualBoundingBoxLeft != null ? metrics.actualBoundingBoxLeft : 0;
+            var actualRight = metrics.actualBoundingBoxRight != null ? metrics.actualBoundingBoxRight : metrics.width;
+            var actualAscent = metrics.actualBoundingBoxAscent != null ? metrics.actualBoundingBoxAscent : numericSize;
+            var actualDescent =
+              metrics.actualBoundingBoxDescent != null ? metrics.actualBoundingBoxDescent : numericSize * 0.2;
+
+            var textBoundingWidth = Math.ceil(actualLeft + actualRight);
+            var tightHeight = Math.ceil(actualAscent + actualDescent);
+            var extraWidthBuffer = 10;
+            var offscreenWidth = textBoundingWidth + extraWidthBuffer;
+            offscreen.width = offscreenWidth;
+            offscreen.height = tightHeight;
+
+            var xOffset = extraWidthBuffer / 2;
+            offCtx.font = font;
+            offCtx.textBaseline = 'alphabetic';
+            offCtx.fillStyle = config.color;
+            offCtx.fillText(config.text, xOffset - actualLeft, actualAscent);
+
+            var horizontalMargin = config.fuzzRange + 20;
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            var cssWidth = offscreenWidth + horizontalMargin * 2;
+            var cssHeight = tightHeight;
+
+            canvas.width = Math.round(cssWidth * dpr);
+            canvas.height = Math.round(cssHeight * dpr);
+            canvas.style.width = cssWidth + 'px';
+            canvas.style.height = cssHeight + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.translate(horizontalMargin, 0);
+
+            var interactiveLeft = horizontalMargin + xOffset;
+            var interactiveTop = 0;
+            var interactiveRight = interactiveLeft + textBoundingWidth;
+            var interactiveBottom = tightHeight;
+
+            var isHovering = false;
+            var currentIntensity = config.baseIntensity;
+            var lastFrameTime = 0;
+            var frameDuration = 1000 / config.fps;
+
+            var drawFrame = function () {
+              ctx.clearRect(
+                -config.fuzzRange - 20,
+                -config.fuzzRange - 10,
+                offscreenWidth + 2 * (config.fuzzRange + 20),
+                tightHeight + 2 * (config.fuzzRange + 10)
+              );
+
+              var targetIntensity = isHovering ? config.hoverIntensity : config.baseIntensity;
+              var step = frameDuration / config.transitionMs;
+              if (currentIntensity < targetIntensity) {
+                currentIntensity = Math.min(currentIntensity + step, targetIntensity);
+              } else if (currentIntensity > targetIntensity) {
+                currentIntensity = Math.max(currentIntensity - step, targetIntensity);
+              }
+
+              // Построчный сдвиг рядов пикселей — «размытие» текста
+              for (var j = 0; j < tightHeight; j++) {
+                var dx = Math.floor(currentIntensity * (Math.random() - 0.5) * config.fuzzRange);
+                ctx.drawImage(offscreen, 0, j, offscreenWidth, 1, dx, j, offscreenWidth, 1);
+              }
+            };
+
+            if (reduceMotion) {
+              // Без анимации — просто чёткий текст
+              ctx.drawImage(offscreen, 0, 0);
+              return;
+            }
+
+            var run = function (timestamp) {
+              if (cancelled) return;
+              if (timestamp - lastFrameTime < frameDuration) {
+                rafId = requestAnimationFrame(run);
+                return;
+              }
+              lastFrameTime = timestamp;
+              drawFrame();
+              rafId = requestAnimationFrame(run);
+            };
+            rafId = requestAnimationFrame(run);
+
+            var isInside = function (x, y) {
+              return x >= interactiveLeft && x <= interactiveRight && y >= interactiveTop && y <= interactiveBottom;
+            };
+            var handleMove = function (clientX, clientY) {
+              var rect = canvas.getBoundingClientRect();
+              isHovering = isInside(clientX - rect.left, clientY - rect.top);
+            };
+            var onMouseMove = function (e) {
+              handleMove(e.clientX, e.clientY);
+            };
+            var onMouseLeave = function () {
+              isHovering = false;
+            };
+            var onTouchMove = function (e) {
+              e.preventDefault();
+              var touch = e.touches && e.touches[0];
+              if (touch) handleMove(touch.clientX, touch.clientY);
+            };
+
+            canvas.addEventListener('mousemove', onMouseMove);
+            canvas.addEventListener('mouseleave', onMouseLeave);
+            canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+            canvas.addEventListener('touchend', onMouseLeave);
+          });
+        };
+
+        init();
+
+        window.addEventListener('pagehide', function () {
+          cancelled = true;
+          if (rafId) cancelAnimationFrame(rafId);
+        });
+      })();
+    </script>
+  </body>
+</html>

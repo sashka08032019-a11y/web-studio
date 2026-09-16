@@ -1,0 +1,44 @@
+{
+  "projects": [
+    {
+      "id": "mebelny-showroom",
+      "title": "Мебельный шоурум",
+      "description": "Каталог с фильтрами по параметрам и заявкой на замер.",
+      "image": "",
+      "tags": ["HTML/CSS/JS", "PHP", "MySQL"],
+      "link": "#",
+      "linkLabel": "Смотреть проект",
+      "published": true
+    },
+    {
+      "id": "logisticheskaya-platforma",
+      "title": "Логистическая платформа",
+      "description": "Личный кабинет для отслеживания грузов в реальном времени.",
+      "image": "",
+      "tags": ["React", "Node.js", "PostgreSQL"],
+      "link": "#",
+      "linkLabel": "Смотреть проект",
+      "published": true
+    },
+    {
+      "id": "restoran",
+      "title": "Ресторан «Название»",
+      "description": "Сайт с меню, бронированием столиков и доставкой.",
+      "image": "",
+      "tags": ["Next.js", "Tailwind", "Stripe"],
+      "link": "#",
+      "linkLabel": "Смотреть проект",
+      "published": true
+    },
+    {
+      "id": "fotograf",
+      "title": "Личный сайт фотографа",
+      "description": "Портфолио с галереями по категориям и формой заказа съёмки.",
+      "image": "",
+      "tags": ["Astro", "Cloudinary"],
+      "link": "#",
+      "linkLabel": "Смотреть проект",
+      "published": true
+    }
+  ]
+}

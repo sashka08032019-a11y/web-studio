@@ -1,0 +1,8 @@
+node_modules
+dist
+.vite-ssg-temp
+
+# оригиналы медиа до сжатия (hero.mp4, poster, логотип) — только локально
+media-originals
+.DS_Store
+*.local
