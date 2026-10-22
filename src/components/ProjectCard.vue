@@ -1,20 +1,52 @@
 <script setup>
-defineProps({
+import { computed, ref } from "vue";
+
+const FALLBACK_IMAGE = "/og-image.jpg";
+
+const props = defineProps({
   project: { type: Object, required: true },
 });
+
+const imageFailed = ref(false);
+
+const imageSrc = computed(() =>
+  imageFailed.value || !props.project.image ? FALLBACK_IMAGE : props.project.image,
+);
+
+const isExternal = computed(() =>
+  typeof props.project.link === "string"
+    ? /^https?:\/\//i.test(props.project.link)
+    : false,
+);
+
+function onImageError() {
+  imageFailed.value = true;
+}
 </script>
 
 <template>
   <article class="work-card">
-    <div class="work-thumb">
+    <component
+      :is="isExternal ? 'a' : 'div'"
+      class="work-thumb"
+      :href="isExternal ? project.link : undefined"
+      :target="isExternal ? '_blank' : undefined"
+      :rel="isExternal ? 'noopener noreferrer' : undefined"
+      :aria-label="isExternal ? `${project.title} — открыть сайт в новой вкладке` : undefined"
+    >
       <img
         v-if="project.image"
-        :src="project.image"
-        :alt="project.title"
+        :src="imageSrc"
+        :alt="
+          imageFailed
+            ? `${project.title} — превью недоступно`
+            : project.imageAlt || project.title
+        "
         loading="lazy"
+        @error="onImageError"
       />
       <span v-else>скриншот проекта</span>
-    </div>
+    </component>
 
     <h3>{{ project.title }}</h3>
     <p>{{ project.description }}</p>
@@ -27,8 +59,8 @@ defineProps({
       v-if="project.link"
       class="work-link"
       :href="project.link"
-      :target="project.link.startsWith('http') ? '_blank' : undefined"
-      :rel="project.link.startsWith('http') ? 'noopener' : undefined"
+      :target="isExternal ? '_blank' : undefined"
+      :rel="isExternal ? 'noopener noreferrer' : undefined"
     >
       {{ project.linkLabel || "Смотреть проект" }}
     </a>
@@ -56,10 +88,21 @@ defineProps({
   padding: 16px;
   overflow: hidden;
 }
+a.work-thumb {
+  padding: 0;
+}
+a.work-thumb:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 .work-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.45s var(--ease);
+}
+a.work-thumb:hover img {
+  transform: scale(1.03);
 }
 .work-card h3 {
   font-size: 1.2rem;

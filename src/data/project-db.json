@@ -39,6 +39,50 @@
       "link": "#",
       "linkLabel": "Смотреть проект",
       "published": true
+    },
+    {
+      "id": "eye-lashes",
+      "title": "Eye Lashes — сайт студии красоты",
+      "description": "Современный сайт для студии красоты с акцентом на услуги по оформлению ресниц, визуальную эстетику и удобство взаимодействия с клиентами.",
+      "image": "/projects/eye-lashes.webp",
+      "imageAlt": "Студия красоты Eye Lashes — главная страница сайта",
+      "tags": ["Beauty / Красота"],
+      "link": "https://eye-lashes.netlify.app/ru",
+      "linkLabel": "Смотреть проект",
+      "published": true
+    },
+    {
+      "id": "qqb",
+      "title": "QQB — корпоративный веб-проект",
+      "description": "Корпоративный сайт казахстанской компании «Қашаған Құрылыс Бірлестігі»: промышленное строительство в нефтегазовой отрасли, услуги, проекты и собственная строительная лаборатория.",
+      "image": "/projects/qqb.webp",
+      "imageAlt": "Сайт компании «Қашаған Құрылыс Бірлестігі» — раздел услуг",
+      "tags": ["Промышленное строительство", "Корпоративный сайт"],
+      "link": "https://qqb.netlify.app/ru",
+      "linkLabel": "Смотреть проект",
+      "published": true
+    },
+    {
+      "id": "beauty-salon-laims",
+      "title": "Beauty Salon Laims — сайт салона красоты",
+      "description": "Элегантный сайт салона красоты, представляющий услуги, атмосферу и стиль бренда. Дизайн помогает подчеркнуть индивидуальность салона и упрощает знакомство клиентов с его предложениями.",
+      "image": "/projects/beauty-salon-laims.webp",
+      "imageAlt": "Салон красоты Beauty Salon Laims — главная страница сайта",
+      "tags": ["Beauty / Красота"],
+      "link": "https://beauty-salon-laims.netlify.app",
+      "linkLabel": "Смотреть проект",
+      "published": true
+    },
+    {
+      "id": "risk-expert",
+      "title": "Risk Expert — решения в области управления рисками",
+      "description": "Сайт независимого эксперта по рискам в строительстве: аудит процессов и документации, сопровождение и управление стройкой, наставничество для линейных руководителей.",
+      "image": "/projects/risk-expert.webp",
+      "imageAlt": "Risk Expert — сайт эксперта по рискам в строительстве",
+      "tags": ["Business / Consulting", "Строительство"],
+      "link": "https://risk-expert.netlify.app/",
+      "linkLabel": "Смотреть проект",
+      "published": true
     }
   ]
 }
