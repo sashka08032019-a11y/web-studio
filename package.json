@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite-ssg build",
-    "build:spa": "vite build",
+    "build": "vite-ssg build && npm run check:seo",
+    "build:spa": "vite build && npm run check:seo -- --spa",
+    "check:seo": "node scripts/check-seo.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

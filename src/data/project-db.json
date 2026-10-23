@@ -1,51 +1,11 @@
 {
   "projects": [
     {
-      "id": "mebelny-showroom",
-      "title": "Мебельный шоурум",
-      "description": "Каталог с фильтрами по параметрам и заявкой на замер.",
-      "image": "",
-      "tags": ["HTML/CSS/JS", "PHP", "MySQL"],
-      "link": "#",
-      "linkLabel": "Смотреть проект",
-      "published": true
-    },
-    {
-      "id": "logisticheskaya-platforma",
-      "title": "Логистическая платформа",
-      "description": "Личный кабинет для отслеживания грузов в реальном времени.",
-      "image": "",
-      "tags": ["React", "Node.js", "PostgreSQL"],
-      "link": "#",
-      "linkLabel": "Смотреть проект",
-      "published": true
-    },
-    {
-      "id": "restoran",
-      "title": "Ресторан «Название»",
-      "description": "Сайт с меню, бронированием столиков и доставкой.",
-      "image": "",
-      "tags": ["Next.js", "Tailwind", "Stripe"],
-      "link": "#",
-      "linkLabel": "Смотреть проект",
-      "published": true
-    },
-    {
-      "id": "fotograf",
-      "title": "Личный сайт фотографа",
-      "description": "Портфолио с галереями по категориям и формой заказа съёмки.",
-      "image": "",
-      "tags": ["Astro", "Cloudinary"],
-      "link": "#",
-      "linkLabel": "Смотреть проект",
-      "published": true
-    },
-    {
       "id": "eye-lashes",
-      "title": "Eye Lashes — сайт студии красоты",
-      "description": "Современный сайт для студии красоты с акцентом на услуги по оформлению ресниц, визуальную эстетику и удобство взаимодействия с клиентами.",
+      "title": "Julia shik — сайт студии наращивания ресниц",
+      "description": "Сайт салона наращивания ресниц Julia shik в Есике: услуги, цены, портфолио и запись через WhatsApp.",
       "image": "/projects/eye-lashes.webp",
-      "imageAlt": "Студия красоты Eye Lashes — главная страница сайта",
+      "imageAlt": "Студия наращивания ресниц Julia shik — главная страница сайта",
       "tags": ["Beauty / Красота"],
       "link": "https://eye-lashes.netlify.app/ru",
       "linkLabel": "Смотреть проект",

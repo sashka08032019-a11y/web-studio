@@ -95,6 +95,19 @@ body.has-open-menu {
   overflow: hidden;
 }
 
+/* Текст только для скринридеров и поисковиков */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Layout helpers */
 .container {
   max-width: var(--container);

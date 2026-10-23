@@ -7,6 +7,7 @@ npm install
 npm run dev         # локальная разработка (http://localhost:5173)
 npm run build       # пре-рендер + сборка в dist/ (vite-ssg)
 npm run build:spa   # запасной вариант: обычная SPA-сборка без пре-рендера
+npm run check:seo   # проверка SEO в dist/ (обе сборки вызывают её сами)
 npm run preview     # просмотр собранной версии
 ```
 
@@ -36,11 +37,12 @@ npm run preview     # просмотр собранной версии
 ```
 
 - `id` — обязателен и уникален (используется как ключ списка).
-- `image` — путь к скриншоту. Файлы кладите в `public/` (например
-  `public/projects/mebel.png` → `"/projects/mebel.png"`). Если оставить пустую
-  строку, покажется заглушка «скриншот проекта».
-- `link` — если оставить `"#"`, ссылка ведёт наверх страницы; внешние ссылки
-  (`https://...`) открываются в новой вкладке.
+- `image` — путь к скриншоту 1280×800 (соотношение 16:10). Файлы кладите в
+  `public/` (например `public/projects/mebel.png` → `"/projects/mebel.png"`).
+  Без изображения блок превью не выводится — заглушек нет.
+- `imageAlt` — осмысленное описание скриншота для доступности и поиска.
+- `link` — только реальный адрес вида `https://...`; он открывается в новой
+  вкладке. Если ссылки нет, кнопка и кликабельное превью не показываются.
 - `published: false` — проект скрыт, но данные остаются в файле.
 
 ## Структура
@@ -48,6 +50,8 @@ npm run preview     # просмотр собранной версии
 ```
 index.html                     точка входа + SEO-теги (домен из .env)
 vite.config.js                 Vue, vite-ssg, генерация robots.txt/sitemap.xml
+scripts/site-url.mjs           домен сайта: .env → один источник для сборки и проверки
+scripts/check-seo.mjs          проверка метатегов, robots.txt и sitemap.xml в dist/
 .env                           VITE_SITE_URL — адрес сайта
 src/
   main.js                      точка входа vite-ssg (пре-рендер + гидратация)
@@ -126,21 +130,47 @@ ffmpeg -y -ss 1 -i public/hero.mp4 -frames:v 1 -vf scale=1600:-2:flags=lanczos \
 
 - Домен задаётся один раз в `.env` → `VITE_SITE_URL` и оттуда подставляется в
   `canonical`, `og:url`, `og:image` и JSON-LD при сборке. Без завершающего слэша.
-- `robots.txt` и `sitemap.xml` генерируются на этапе сборки из того же значения
-  (см. `ssgOptions.onFinished` в `vite.config.js`).
-- В `index.html` лежат Open Graph/Twitter-теги и JSON-LD (`ProfessionalService`).
-- Заглушки, которые видит поисковик: имя/email/telegram в JSON-LD внутри
-  `index.html`.
+  Если переменная не задана, используется адрес продакшена по умолчанию.
+- `robots.txt` и `sitemap.xml` генерируются в `closeBundle` (см. `vite.config.js`)
+  и при полной сборке, и при `build:spa`. В карте сайта одна запись — главная
+  страница; `lastmod` не проставляется, так как достоверной даты изменения нет.
+- В `index.html` лежат уникальные title/description, Open Graph/Twitter-теги и
+  JSON-LD (`Person` + `WebSite`) с реальными контактами.
+- Страница отдаётся статическим HTML: заголовки, тексты и карточки проектов
+  видны роботам без выполнения JavaScript.
+- `npm run build` и `npm run build:spa` заканчиваются проверкой `dist/`
+  (`scripts/check-seo.mjs`, ~65 проверок, без зависимостей). Если проверка не
+  прошла, сборка падает с ненулевым кодом и списком ошибок — сломанный
+  `dist/` не уедет на хостинг незамеченным. Что проверяется:
+  - ровно один `title` (15–70 символов) и `description` (50–180), без
+    дублей и без выдуманных значений;
+  - `canonical` — один, https, без query/hash, совпадает с `og:url`,
+    `VITE_SITE_URL` и `Person`/`WebSite.url` из JSON-LD;
+  - Open Graph/Twitter: обязательные теги, `og:image` существует в сборке;
+  - JSON-LD парсится как JSON и содержит `Person` и `WebSite` с корректным
+    email и абсолютными ссылками;
+  - `robots.txt`: `Allow: /`, нет `Disallow: /`, `Sitemap` ведёт на тот же
+    домен;
+  - `sitemap.xml`: валидная XML-обёртка, ровно одна страница, ссылки без
+    дублей и совпадают с `canonical`;
+  - нет незаменённых `%VITE_…%`, `example.com`, пустого `#app` и забытых
+    `<title>Vite App</title>` / `Lorem ipsum`.
+
+  Проверить конкретную папку можно вручную:
+  `node scripts/check-seo.mjs --dir dist` (для SPA-сборки — с флагом `--spa`,
+  который отключает проверки пре-рендера).
 
 Пре-рендер стоит ~8 КБ gzip JS (head-менеджер и логика гидратации vite-ssg),
 но позволяет отдавать контент сразу, без ожидания бандла.
 
 ## Что заменить перед публикацией
 
-0. Домен — в `.env` (`VITE_SITE_URL`), затем `npm run build`.
+0. Домен — в `.env` (`VITE_SITE_URL`), затем `npm run build`. Если хостинг
+   собирает проект сам, продублируйте переменную в его настройках окружения.
 1. Логотип — `public/logo.png` (96×96), шапка — `src/components/TheHeader.vue`,
    соцсети — `TheFooter.vue` (год в копирайте подставляется автоматически).
-2. Имя, email и telegram — в JSON-LD внутри `index.html`.
+2. Title, description и JSON-LD (`Person`) — в `index.html`; меняйте при смене
+   имени, контактов или специализации.
 3. Тексты hero — `src/components/HeroSection.vue`.
 4. Проекты — `src/data/project-db.json`.
 5. Услуги и шаги процесса — массивы `services` и `steps` в

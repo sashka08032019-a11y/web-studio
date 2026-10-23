@@ -1,16 +1,48 @@
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { getSiteUrl } from "./scripts/site-url.mjs";
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
   // Один источник правды по домену: .env → canonical/og-теги, robots.txt, sitemap.xml
-  const siteUrl = (env.VITE_SITE_URL || "https://example.com").replace(/\/+$/, "");
+  // (тем же значением пользуется scripts/check-seo.mjs)
+  const siteUrl = getSiteUrl(mode);
   const outDir = resolve(process.cwd(), "dist");
 
+  /**
+   * robots.txt и sitemap.xml нужны и при полной сборке (vite-ssg), и при
+   * запасной SPA-сборке, поэтому пишем их в closeBundle, а не в ssgOptions.
+   */
+  const seoFiles = () => ({
+    name: "seo-files",
+    async closeBundle() {
+      const robots = `User-agent: *
+Allow: /
+
+Sitemap: ${siteUrl}/sitemap.xml
+`;
+
+      // Сайт одностраничный: единственный канонический URL — главная.
+      // lastmod не указываем, надёжной даты изменения контента нет.
+      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${siteUrl}/</loc>
+  </url>
+</urlset>
+`;
+
+      await mkdir(outDir, { recursive: true });
+      await Promise.all([
+        writeFile(resolve(outDir, "robots.txt"), robots, "utf8"),
+        writeFile(resolve(outDir, "sitemap.xml"), sitemap, "utf8"),
+      ]);
+    },
+  });
+
   return {
-    plugins: [vue()],
+    plugins: [vue(), seoFiles()],
 
     build: {
       // Всегда чистим dist, иначе в деплой уедут старые файлы из public/
@@ -20,30 +52,6 @@ export default defineConfig(({ mode }) => {
     ssgOptions: {
       entry: "src/main.js",
       formatting: "minify",
-      /** robots.txt и sitemap.xml генерируются из VITE_SITE_URL */
-      async onFinished() {
-        const robots = `User-agent: *
-Allow: /
-
-Sitemap: ${siteUrl}/sitemap.xml
-`;
-
-        const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${siteUrl}/</loc>
-    <lastmod>${new Date().toISOString().slice(0, 10)}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
-  </url>
-</urlset>
-`;
-
-        await Promise.all([
-          writeFile(resolve(outDir, "robots.txt"), robots, "utf8"),
-          writeFile(resolve(outDir, "sitemap.xml"), sitemap, "utf8"),
-        ]);
-      },
     },
   };
 });

@@ -26,7 +26,12 @@ const { canAutoplay } = useAutoplayVideo();
     <div class="hero-content">
       <div class="hero-text">
         <h1 class="hero-title">
+          <!-- Текст дублируется для поисковиков и скринридеров: SVG ниже декоративный -->
+          <span class="visually-hidden"
+            >Сайты и веб-сервисы, которые работают на результат</span
+          >
           <StrokeText
+            aria-hidden="true"
             :text="'Сайты и веб-сервисы,\nкоторые работают на результат'"
             stroke-color="#A78BFA"
             fill-color="#F8FAFC"
@@ -44,8 +49,8 @@ const { canAutoplay } = useAutoplayVideo();
         </h1>
         <p class="hero-sub">
           Проектирование, дизайн и разработка — от лендинга до сложного каталога.
-          Пример заголовка и оффера ниже — замените на свой, когда пришлёте
-          детали.
+          В портфолио — сайты студий красоты, промышленных и консалтинговых
+          компаний.
         </p>
         <div class="hero-actions">
           <a href="#work" class="btn btn-primary">Смотреть работы</a>

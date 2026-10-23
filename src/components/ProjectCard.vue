@@ -1,22 +1,21 @@
 <script setup>
 import { computed, ref } from "vue";
 
-const FALLBACK_IMAGE = "/og-image.jpg";
-
 const props = defineProps({
   project: { type: Object, required: true },
 });
 
 const imageFailed = ref(false);
 
-const imageSrc = computed(() =>
-  imageFailed.value || !props.project.image ? FALLBACK_IMAGE : props.project.image,
+const isExternal = computed(
+  () =>
+    typeof props.project.link === "string" &&
+    /^https?:\/\//i.test(props.project.link),
 );
 
-const isExternal = computed(() =>
-  typeof props.project.link === "string"
-    ? /^https?:\/\//i.test(props.project.link)
-    : false,
+// Без реального скриншота не показываем ни картинку, ни заглушку
+const showImage = computed(
+  () => Boolean(props.project.image) && !imageFailed.value,
 );
 
 function onImageError() {
@@ -28,24 +27,24 @@ function onImageError() {
   <article class="work-card">
     <component
       :is="isExternal ? 'a' : 'div'"
+      v-if="showImage"
       class="work-thumb"
       :href="isExternal ? project.link : undefined"
       :target="isExternal ? '_blank' : undefined"
       :rel="isExternal ? 'noopener noreferrer' : undefined"
-      :aria-label="isExternal ? `${project.title} — открыть сайт в новой вкладке` : undefined"
+      :aria-label="
+        isExternal ? `${project.title} — открыть сайт в новой вкладке` : undefined
+      "
     >
       <img
-        v-if="project.image"
-        :src="imageSrc"
-        :alt="
-          imageFailed
-            ? `${project.title} — превью недоступно`
-            : project.imageAlt || project.title
-        "
+        :src="project.image"
+        :alt="project.imageAlt || project.title"
+        width="1280"
+        height="800"
         loading="lazy"
+        decoding="async"
         @error="onImageError"
       />
-      <span v-else>скриншот проекта</span>
     </component>
 
     <h3>{{ project.title }}</h3>
@@ -56,13 +55,13 @@ function onImageError() {
     </div>
 
     <a
-      v-if="project.link"
+      v-if="isExternal"
       class="work-link"
       :href="project.link"
-      :target="isExternal ? '_blank' : undefined"
-      :rel="isExternal ? 'noopener noreferrer' : undefined"
+      target="_blank"
+      rel="noopener noreferrer"
     >
-      {{ project.linkLabel || "Смотреть проект" }}
+      {{ project.linkLabel || "Открыть сайт" }}
     </a>
   </article>
 </template>
@@ -82,10 +81,6 @@ function onImageError() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  text-align: center;
-  padding: 16px;
   overflow: hidden;
 }
 a.work-thumb {

@@ -15,7 +15,7 @@ const projects = computed(() =>
     <div class="container">
       <SectionHeader
         title="Портфолио"
-        note="Проекты добавляются в файл src/data/project-db.json — карточки строятся автоматически."
+        note="Сайты, которые я спроектировал и разработал."
       />
 
       <div class="work-grid">
@@ -26,10 +26,6 @@ const projects = computed(() =>
           :project="project"
         />
       </div>
-
-      <p v-if="!projects.length" class="work-empty">
-        Пока нет ни одного проекта — добавьте первый в project-db.json.
-      </p>
     </div>
   </section>
 </template>
@@ -37,12 +33,9 @@ const projects = computed(() =>
 <style scoped>
 .work-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--line);
-}
-.work-empty {
-  color: var(--text-muted);
 }
 </style>
